@@ -169,5 +169,5 @@ cython_debug/
 /.idea/PassForge.iml
 /.idea/inspectionProfiles/profiles_settings.xml
 /.idea/inspectionProfiles/Project_Default.xml
-/test.py
 /.idea/vcs.xml
+/.idea/git_toolbox_prj.xml
