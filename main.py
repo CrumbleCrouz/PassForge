@@ -1,174 +1,234 @@
-import types
-from datetime import date
-from random import randint
+# Internal modules
+import sys
+import os
+
+# Project modules
+import core
+
+# Externals modules
+import keyboard as kb
+import msvcrt
+
+digits_key_hashmap = {
+    79: '1',
+    80: '2',
+    81: '3',
+    75: '4',
+    76: '5',
+    77: '6',
+    71: '7',
+    72: '8',
+    73: '9',
+    82: '0'
+}
 
 
-class Password:
-    def __init__(self, min_size=None, n_numb=None, n_alpha=None, n_char=None, not_numb=None, not_alpha=None,
-                 not_char=None, alpha_type="all"):
-        match type(min_size):
-            case types.NoneType:
-                if n_alpha is None or n_numb is None or n_char is None:
-                    if not n_numb and not n_alpha and not n_char:
-                        raise ValueError("You must specify the size of the password !")
-                    raise ValueError("You must specify the size of the password if all custom sizes are not specified!")
-            case _:
-                try:
-                    self._len = int(min_size)
-                    if self._len < 1:
-                        raise ValueError("The default password size must be greater than 1 !")
-                except TypeError:
-                    raise ValueError("You must enter a whole number!")
-
-        if min_size:
-            calc_prct = special_division(self._len)
-            s_prct = calc_prct[0]
-            t_prct = calc_prct[1]
-        if n_numb:
-            try:
-                n_numb = int(n_numb)
-                if n_numb < 0:
-                    raise
-            except:
-                raise ValueError(f"Specified custom sizes on n_numb must be an integer greater than or equal to 0 !")
-        if n_alpha:
-            try:
-                n_alpha = int(n_alpha)
-                if n_alpha < 0:
-                    raise
-            except:
-                raise ValueError(f"Specified custom sizes on n_alpha must be an integer greater than or equal to 0 !")
-        if n_char:
-            try:
-                n_char = int(n_char)
-                if n_char < 0:
-                    raise
-            except:
-                raise ValueError(f"Specified custom sizes on n_char must be an integer greater than or equal to 0 !")
-
-        match min_size:
-            case 1:
-                self._numbers_a = n_alpha if n_alpha is not None else 1
-                self._numbers_n = n_numb if n_numb is not None else 0
-                self._numbers_c = n_char if n_char is not None else 0
-            case 2:
-                self._numbers_a = n_alpha if n_alpha is not None else 1
-                self._numbers_n = n_numb if n_numb is not None else 1
-                self._numbers_c = n_char if n_char is not None else 0
-            case 3:
-                self._numbers_a = n_alpha if n_alpha is not None else 1
-                self._numbers_n = n_numb if n_numb is not None else 1
-                self._numbers_c = n_char if n_char is not None else 1
-            case _:
-                self._numbers_a = n_alpha if n_alpha is not None else s_prct
-                self._numbers_n = n_numb if n_numb is not None else t_prct
-                self._numbers_c = n_char if n_char is not None else t_prct
-
-        self._forbid_alph = not_numb
-        self._forbid_numb = not_alpha
-        self._forbid_char = not_char
-        self._preferred_alpha = alpha_type
-
-    def generate(self):
-        raw_password = []
-        str_password = ""
-        if self._numbers_a > 0:
-            raw_password += self.with_alpha()
-        if self._numbers_n > 0:
-            raw_password += self.with_number()
-        if self._numbers_c > 0:
-            raw_password += self.with_char()
-        for e in custom_shuffle(raw_password):
-            str_password += str(e)
-        return str_password
-
-    def with_number(self) -> list:
-        numbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-        if self._forbid_numb is not None:
-            for e in self._forbid_numb:
-                for ind in range(len(numbers)):
-                    if e == numbers[ind]:
-                        numbers.pop(ind)
-                        break
-        return [numbers[randint(0, len(numbers) - 1)] for it in range(self._numbers_n)]
-
-    def with_alpha(self) -> list:
-        alpha_maj = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
-                     'U', 'V', 'W', 'X', 'Y', 'Z']
-        alpha_min = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
-                     'u', 'v', 'w', 'x', 'y', 'z']
-        if self._forbid_alph is not None:
-            for e in self._forbid_alph:
-                for ind in range(len(alpha_min)):
-                    if e == alpha_min[ind]:
-                        alpha_min.pop(ind)
-                        break
-                for ind in range(len(alpha_maj)):
-                    if e == alpha_maj[ind]:
-                        alpha_maj.pop(ind)
-                        break
-        match self._preferred_alpha.lower():
-            case "all" | "default":
-                return [alpha_maj[randint(0, len(alpha_maj) - 1)] if randint(1, 2) % 2 == 0 else
-                        alpha_min[randint(0, len(alpha_min) - 1)] for it in range(self._numbers_a)]
-            case "maj" | "upper":
-                return [alpha_maj[randint(0, len(alpha_maj) - 1)] for it in range(self._numbers_a)]
-            case "min" | "lower":
-                return [alpha_min[randint(0, len(alpha_min) - 1)] for it in range(self._numbers_a)]
-            case _:
-                raise ValueError("The type of the letters must be upper (or maj), lower (or min) or both "
-                                 + "(all or default) !")
-
-    def with_char(self) -> list:
-        characters = ['!', '?', '@', '#', '$', '%', '^', '&', '*', '(', ')', '{', '}', '[', ']', '_', '-', '+']
-        if self._forbid_char is not None:
-            for e in self._forbid_char:
-                for ind in range(len(characters)):
-                    if e == characters[ind]:
-                        characters.pop(ind)
-                        break
-        return [characters[randint(0, len(characters) - 1)] for it in range(self._numbers_c)]
-
-
-def special_division(n):
-    sixty_percent = int(0.6 * n)
-    twenty_percent = int(0.2 * n)
-    good = False
-    while not good:
-        if type(sixty_percent) is not int:
-            sixty_percent = take_superior(sixty_percent, n)
-        elif type(twenty_percent) is not int or twenty_percent <= 0:
-            twenty_percent = take_superior(twenty_percent, n)
-        elif sixty_percent + twenty_percent * 2 < n:
-            sixty_percent += 1
-        elif sixty_percent + twenty_percent * 2 > n:
-            sixty_percent -= 1
+def initial_screen():
+    selected_list = "*  "
+    pressing = False
+    while True:
+        clear_stdin()
+        print("\033[H\033[J", end="")
+        print(f"╔{'═' * 22}╗")
+        print(f"║ [{selected_list[0]}] Default Settings ║")
+        print(f"║ [{selected_list[1]}] Custom Settings  ║")
+        print(f"║ [{selected_list[2]}] Exit{' ' * 13}║")
+        print(f"╚{'═' * 22}╝")
+        key = kb.read_event()
+        if not pressing:
+            if key.scan_code == 72 and not key.is_keypad:  # UP ARROW
+                pressing = True
+                if selected_list[0] != '*':
+                    selected_list = change_str(selected_list, 0, '')
+            elif key.scan_code == 80 and not key.is_keypad:  # DOWN ARROW
+                pressing = True
+                if selected_list[2] != '*':
+                    selected_list = ' ' + selected_list
+            elif key.scan_code == 28:  # ENTER
+                if selected_list[0] == '*':
+                    return ds_screen()
+                elif selected_list[1] == '*':
+                    return cs_screen()
+                else:
+                    return
         else:
-            good = True
-    return sixty_percent, twenty_percent
+            pressing = False
+            clear_stdin()
 
 
-def take_superior(n, m):
-    while n < m:
-        m -= 1
-    return m + 1
+def ds_screen():
+    clear_stdin()
+    n = '0'
+    pressing = False
+    while True:
+        print("\033[H\033[J", end="")
+        print(f"╔{'═' * 23}╦{'═' * (len(n) + 2)}╗")
+        print(f"║ Size of the password: ║ {n} ║")
+        print(f"╚{'═' * 23}╩{'═' * (len(n) + 2)}╝")
+        key = kb.read_event()
+        if not pressing:
+            if key.scan_code in digits_key_hashmap and key.is_keypad:  # KEYPAD NUMBERS
+                pressing = True
+                n = n + digits_key_hashmap[key.scan_code] if int(n) > 0 else digits_key_hashmap[key.scan_code]
+            elif key.scan_code == 14:  # BACKSPACE
+                pressing = True
+                n = change_str(n, len(n) - 1, '') if len(n) > 1 else '0'
+            elif key.scan_code == 28 and int(n) > 0:  # ENTER
+                return result_screen(size=int(n))
+            elif key.scan_code == 1:  # ESC
+                clear_stdin()
+                return initial_screen()
+        else:
+            pressing = False
+            clear_stdin()
 
 
-def custom_shuffle(original_list):
-    shuffled_list = original_list.copy()
+def cs_screen():
+    clear_stdin()
+    pressing = False
+    alpha_types = ["<- All ->", "<- Uppercase ->", "<- Lowercase ->"]
+    alpha_ind = 0
+    nb_alpha = '0'
+    nb_numb = '0'
+    nb_char = '0'
+    selected_list = "*    "
 
-    for i in range(len(shuffled_list) - 1, 0, -1):
-        j = randint(0, i)
-        shuffled_list[i], shuffled_list[j] = shuffled_list[j], shuffled_list[i]
+    while True:
+        bigger = len(alpha_types[alpha_ind]) if len(alpha_types[alpha_ind]) >= len(nb_alpha) and len(
+            alpha_types[alpha_ind]) >= len(nb_numb) and len(alpha_types[alpha_ind]) >= len(nb_char) else len(
+            nb_alpha) if len(nb_alpha) >= len(nb_numb) and len(nb_alpha) >= len(nb_char) else len(nb_numb) if len(
+            nb_numb) >= len(nb_char) else len(nb_char)
+        print("\033[H\033[J", end="")
+        print(f"╔{'═' * 27}╦{'═' * (bigger + 2)}╗")
+        print(f"║ [{selected_list[0]}] Number of letters:    ║ {nb_alpha.center(bigger)} ║")
+        print(f"╠{'═' * 27}╬{'═' * (bigger + 2)}╣")
+        print(f"║ [{selected_list[1]}] Number of numbers:    ║ {nb_numb.center(bigger)} ║")
+        print(f"╠{'═' * 27}╬{'═' * (bigger + 2)}╣")
+        print(f"║ [{selected_list[2]}] Number of characters: ║ {nb_char.center(bigger)} ║")
+        print(f"╠{'═' * 27}╬{'═' * (bigger + 2)}╣")
+        print(f"║ [{selected_list[3]}] Type of letters:      ║ {alpha_types[alpha_ind].center(bigger)} ║")
+        print(f"╠{'═' * 27}╩{'═' * (bigger + 2)}╣")
+        print(f"║ [{selected_list[4]}] Generate password {' ' * (bigger + 7)}║")
+        print(f"╚{'═' * (bigger + 30)}╝")
+        key = kb.read_event()
 
-    return shuffled_list
+        if not pressing:
+            if key.scan_code == 72 and not key.is_keypad:  # UP ARROW
+                pressing = True
+                if selected_list[0] != '*':
+                    selected_list = change_str(selected_list, 0, '')
+            elif key.scan_code == 80 and not key.is_keypad:  # DOWN ARROW
+                pressing = True
+                if selected_list[4] != '*':
+                    selected_list = ' ' + selected_list
+            elif key.scan_code in digits_key_hashmap and key.is_keypad:  # KEYPAD NUMBERS
+                pressing = True
+                if selected_list[0] == '*':
+                    nb_alpha = nb_alpha + digits_key_hashmap[key.scan_code] if int(nb_alpha) > 0 else \
+                    digits_key_hashmap[key.scan_code]
+                elif selected_list[1] == '*':
+                    nb_numb = nb_numb + digits_key_hashmap[key.scan_code] if int(nb_numb) > 0 else digits_key_hashmap[
+                        key.scan_code]
+                elif selected_list[2] == '*':
+                    nb_char = nb_char + digits_key_hashmap[key.scan_code] if int(nb_char) > 0 else digits_key_hashmap[
+                        key.scan_code]
+            elif key.scan_code == 14:  # BACKSPACE
+                pressing = True
+                if selected_list[0] == '*':
+                    nb_alpha = change_str(nb_alpha, len(nb_alpha) - 1, '') if len(nb_alpha) > 1 else '0'
+                elif selected_list[1] == '*':
+                    nb_numb = change_str(nb_numb, len(nb_numb) - 1, '') if len(nb_numb) > 1 else '0'
+                elif selected_list[2] == '*':
+                    nb_char = change_str(nb_char, len(nb_char) - 1, '') if len(nb_char) > 1 else '0'
+            elif key.scan_code == 75:  # LEFT ARROW
+                pressing = True
+                if selected_list[3] == '*':
+                    alpha_ind = alpha_ind - 1 if alpha_ind > 0 else 2
+            elif key.scan_code == 77:  # RIGHT ARROW
+                pressing = True
+                print(selected_list)
+                if selected_list[3] == '*':
+                    print('reached')
+                    alpha_ind = alpha_ind + 1 if alpha_ind < 2 else 0
+            elif key.scan_code == 1:  # ESC
+                clear_stdin()
+                return initial_screen()
+            elif key.scan_code == 28:
+                if selected_list[4] == '*':
+                    return result_screen(nb_alpha=nb_alpha, nb_numb=nb_numb, nb_char=nb_char,
+                                         alpha_type=alpha_types[alpha_ind][3:-3].lower())
+        else:
+            pressing = False
+            clear_stdin()
+
+
+def result_screen(size: int = None, nb_alpha=None, nb_numb=None, nb_char=None, alpha_type="all"):
+    clear_stdin()
+    pressing = False
+    passwd = core.Password(min_size=size, n_numb=nb_numb, n_alpha=nb_alpha, n_char=nb_char, not_numb=None,
+                           not_alpha=None, not_char=None, alpha_type=alpha_type).generate()
+    while True:
+        print("\033[H\033[J", end="")
+        print(f"╔{'═' * (25 + (7 if len(passwd) < 8 else len(passwd)))}╗")
+        print(f"║ Here is your password: {passwd}{' ' * (8 - len(passwd) if len(passwd) < 8 else 1)}║")
+        print(f"║ Press c to copy to clipboard{' ' * (3 if len(passwd) < 8 else len(passwd) - 4)}║")
+        print(f"║ Press r to regenerate password{' ' * (1 if len(passwd) < 8 else len(passwd) - 6)}║")
+        print(f"╚{'═' * (25 + (7 if len(passwd) < 8 else len(passwd)))}╝")
+        key = kb.read_event()
+        if not pressing:
+            if key.scan_code == 1:  # ESC
+                clear_stdin()
+                return initial_screen()
+            if key.scan_code == 46:  # C
+                pressing = True
+                print(copy_to_clipboard(passwd))
+            if key.scan_code == 19:  # R
+                pressing = True
+                clear_stdin()
+                passwd = core.Password(min_size=size, n_numb=nb_numb, n_alpha=nb_alpha, n_char=nb_char, not_numb=None,
+                                       not_alpha=None, not_char=None, alpha_type=alpha_type).generate()
+        else:
+            pressing = False
+            clear_stdin()
+
+
+def change_str(chain: str, index: int, newstr: str):
+    newchain = ''
+    for i in range(len(chain)):
+        newchain += chain[i] if i != index else newstr
+    return newchain
+
+
+def clear_stdin():
+    while msvcrt.kbhit():
+        msvcrt.getch()
+    sys.stdin.flush()
+
+
+def copy_to_clipboard(text: str):
+    try:
+        # Linux
+        if "linux" in sys.platform:
+            os.system(f"echo '{text}' | xclip -selection clipboard")
+
+        # Windows
+        elif "win" in sys.platform:
+            os.system(f"echo {text.strip()} | clip")
+            return os.system("msg %USERNAME% Successfully copied to clipboard !")
+
+        # macOS
+        elif "darwin" in sys.platform:
+            os.system(f"echo '{text}' | pbcopy")
+
+        else:
+            return "Unsupported operating system"
+    except Exception as e:
+        raise f"An error occurred while trying to copy to the clipboard: {e}"
 
 
 if __name__ == "__main__":
     try:
-        # Generate a password with the default settings. Customize them will be intensified with the cli interface.
-        print(Password(input("What size for the password ? ")).generate())
-        input()
+        initial_screen()
     except Exception as err:
         print("\033[H\033[J", end="")
         print('-' * (len(str(err)) + 24))
