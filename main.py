@@ -1,4 +1,5 @@
 # Internal modules
+import builtins
 import sys
 import os
 
@@ -40,12 +41,10 @@ def initial_screen():
         if not pressing:
             if key.scan_code == 72 and not key.is_keypad:  # UP ARROW
                 pressing = True
-                if selected_list[0] != '*':
-                    selected_list = change_str(selected_list, 0, '')
+                selected_list = change_str(selected_list, 0, '') if selected_list[0] != '*' else "  *  "
             elif key.scan_code == 80 and not key.is_keypad:  # DOWN ARROW
                 pressing = True
-                if selected_list[2] != '*':
-                    selected_list = ' ' + selected_list
+                selected_list = ' ' + selected_list if selected_list[2] != '*' else "*  "
             elif key.scan_code == 28:  # ENTER
                 if selected_list[0] == '*':
                     return ds_screen()
@@ -58,9 +57,8 @@ def initial_screen():
             clear_stdin()
 
 
-def ds_screen():
+def ds_screen(n='0'):
     clear_stdin()
-    n = '0'
     pressing = False
     while True:
         print("\033[H\033[J", end="")
@@ -75,11 +73,17 @@ def ds_screen():
             if pressed_key in core.numbers_str:  # NUMBERS
                 pressing = True
                 n = n + pressed_key if int(n) > 0 else pressed_key
+            elif key.scan_code == 75:  # LEFT ARROW
+                pressing = True
+                n = str(int(n) - 1) if int(n) > 0 else n
+            elif key.scan_code == 77:  # RIGHT ARROW
+                pressing = True
+                n = str(int(n) + 1)
             elif key.scan_code == 14:  # BACKSPACE
                 pressing = True
                 n = change_str(n, len(n) - 1, '') if len(n) > 1 else '0'
             elif key.scan_code == 28 and int(n) > 0:  # ENTER
-                return result_screen(size=int(n))
+                return result_screen(size=int(n), callback="ds_screen")
             elif key.scan_code == 1:  # ESC
                 clear_stdin()
                 return initial_screen()
@@ -88,19 +92,25 @@ def ds_screen():
             clear_stdin()
 
 
-def cs_screen():
+def cs_screen(alpha_ind=None, nb_alpha='0', nb_numb='0', nb_char='0', ban_alph=[], ban_numb=[], ban_char=[]):
     clear_stdin()
     pressing = False
-    alpha_types = ["<- All ->", "<- Uppercase ->", "<- Lowercase ->"]
-    alpha_ind = 0
-    nb_alpha = '0'
-    nb_numb = '0'
-    nb_char = '0'
-    selected_list = "*     "
-    ban_alph = []
-    ban_numb = []
-    ban_char = []
+    match type(alpha_ind):
+        case builtins.int:
+            pass
+        case builtins.str:
+            match alpha_ind:
+                case "uppercase":
+                    alpha_ind = 1
+                case "lowercase":
+                    alpha_ind = 2
+                case _:
+                    alpha_ind = 0
+        case _:
+            alpha_ind = 0
 
+    alpha_types = ["<- All ->", "<- Uppercase ->", "<- Lowercase ->"]
+    selected_list = "*     "
     while True:
         bigger = len(alpha_types[alpha_ind]) if len(alpha_types[alpha_ind]) >= len(nb_alpha) and len(
             alpha_types[alpha_ind]) >= len(nb_numb) and len(alpha_types[alpha_ind]) >= len(nb_char) else len(
@@ -125,14 +135,12 @@ def cs_screen():
         key = kb.read_event()
         kb.hook(what_is_this_key)
         if not pressing:
-            if key.scan_code == 72 and not key.is_keypad:  # UP ARROW
+            if pressed_key_code == 72 and not key.is_keypad:  # UP ARROW
                 pressing = True
-                if selected_list[0] != '*':
-                    selected_list = change_str(selected_list, 0, '')
-            elif key.scan_code == 80 and not key.is_keypad:  # DOWN ARROW
+                selected_list = change_str(selected_list, 0, '') if selected_list[0] != '*' else "     *     "
+            elif pressed_key_code == 80 and not key.is_keypad:  # DOWN ARROW
                 pressing = True
-                if selected_list[5] != '*':
-                    selected_list = ' ' + selected_list
+                selected_list = ' ' + selected_list if selected_list[5] != '*' else "*     "
             elif pressed_key in core.numbers_str:  # NUMBERS
                 pressing = True
                 if selected_list[0] == '*':
@@ -182,7 +190,7 @@ def cs_screen():
                 if selected_list[5] == '*':
                     return result_screen(nb_alpha=nb_alpha, nb_numb=nb_numb, nb_char=nb_char,
                                          alpha_type=alpha_types[alpha_ind][3:-3].lower(), banned_alpha=ban_alph,
-                                         banned_numb=ban_numb, banned_characters=ban_char)
+                                         banned_numb=ban_numb, banned_characters=ban_char, callback="cs_screen")
         else:
             pressing = False
             clear_stdin()
@@ -215,12 +223,10 @@ def advanced_screen(ban_alpha: list, ban_numbers: list, ban_characters: list) ->
         if not pressing:
             if pressed_key_code == 72 and not key.is_keypad:  # UP ARROW
                 pressing = True
-                if selected_list[0] != '*':
-                    selected_list = change_str(selected_list, 0, '')
+                selected_list = change_str(selected_list, 0, '') if selected_list[0] != '*' else "   *   "
             elif pressed_key_code == 80 and not key.is_keypad:  # DOWN ARROW
                 pressing = True
-                if selected_list[3] != '*':
-                    selected_list = ' ' + selected_list
+                selected_list = ' ' + selected_list if selected_list[3] != '*' else "*   "
             elif pressed_key_code == 28:  # ENTER
                 pressing = True
                 if selected_list[3] == '*':
@@ -265,7 +271,7 @@ def advanced_screen(ban_alpha: list, ban_numbers: list, ban_characters: list) ->
             clear_stdin()
 
 
-def result_screen(size: int = None, nb_alpha=None, nb_numb=None, nb_char=None, alpha_type="all", banned_alpha=[],
+def result_screen(callback, size=None, nb_alpha=None, nb_numb=None, nb_char=None, alpha_type="all", banned_alpha=[],
                   banned_numb=[], banned_characters=[]):
     clear_stdin()
     pressing = False
@@ -279,6 +285,7 @@ def result_screen(size: int = None, nb_alpha=None, nb_numb=None, nb_char=None, a
         print(f"║ Here is your password: {passwd}{' ' * (9 - len(passwd) if len(passwd) < 8 else 1)}║")
         print(f"║ Press c to copy to clipboard{' ' * (4 if len(passwd) < 8 else len(passwd) - 4)}║")
         print(f"║ Press r to regenerate password{' ' * (2 if len(passwd) < 8 else len(passwd) - 6)}║")
+        print(f"║ Press e to edit generation{' ' * (6 if len(passwd) < 8 else len(passwd) - 2)}║")
         print(f"╚{'═' * (26 + (7 if len(passwd) < 8 else len(passwd) - 1))}╝")
         key = kb.read_event()
         if not pressing:
@@ -294,6 +301,13 @@ def result_screen(size: int = None, nb_alpha=None, nb_numb=None, nb_char=None, a
                 passwd = core.Password(min_size=size, n_numb=nb_numb, n_alpha=nb_alpha, n_char=nb_char,
                                        not_numb=banned_numb, not_alpha=banned_alpha, not_char=banned_characters,
                                        alpha_type=alpha_type).generate()
+            if key.scan_code == 18:
+                match callback:
+                    case "ds_screen":
+                        return ds_screen(n=str(size))
+                    case "cs_screen":
+                        return cs_screen(alpha_ind=alpha_type, nb_alpha=nb_alpha, nb_numb=nb_numb, nb_char=nb_char,
+                                         ban_alph=banned_alpha, ban_numb=banned_numb, ban_char=banned_characters)
         else:
             pressing = False
             clear_stdin()
