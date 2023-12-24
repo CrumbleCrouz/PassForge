@@ -62,8 +62,8 @@ class Password:
                 self._numbers_n = n_numb if n_numb is not None else t_percent
                 self._numbers_c = n_char if n_char is not None else t_percent
 
-        self._forbid_alph = not_numb
-        self._forbid_numb = not_alpha
+        self._forbid_alph = not_alpha
+        self._forbid_numb = not_numb
         self._forbid_char = not_char
         self._preferred_alpha = alpha_type
 
