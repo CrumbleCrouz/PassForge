@@ -1,4 +1,9 @@
-from main import *
+import keyboard
 
-passwd = Password(n_numb=4, n_alpha=10, n_char=2, alpha_type="upper")
-print(passwd.generate())
+
+def on_key_event(e):
+    print(f"name:  {e.name}\ncode: {e.scan_code}")
+
+
+keyboard.hook(on_key_event)
+keyboard.wait("esc")

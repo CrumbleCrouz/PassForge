@@ -1,6 +1,14 @@
 import types
 from random import randint
 
+alpha_maj = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U',
+             'V', 'W', 'X', 'Y', 'Z']
+alpha_min = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u',
+             'v', 'w', 'x', 'y', 'z']
+characters = ['!', '?', '@', '#', '$', '%', '^', '&', '*', '(', ')', '{', '}', '[', ']', '_', '-', '+']
+numbers = [n for n in range(0, 10)]
+numbers_str = [str(n) for n in range(0, 10)]
+
 
 class Password:
     def __init__(self, min_size=None, n_numb=None, n_alpha=None, n_char=None, not_numb=None, not_alpha=None,
@@ -81,7 +89,6 @@ class Password:
         return str_password
 
     def with_number(self) -> list:
-        numbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
         if self._forbid_numb is not None:
             for e in self._forbid_numb:
                 for ind in range(len(numbers)):
@@ -91,10 +98,6 @@ class Password:
         return [numbers[randint(0, len(numbers) - 1)] for it in range(self._numbers_n)]
 
     def with_alpha(self) -> list:
-        alpha_maj = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
-                     'U', 'V', 'W', 'X', 'Y', 'Z']
-        alpha_min = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
-                     'u', 'v', 'w', 'x', 'y', 'z']
         if self._forbid_alph is not None:
             for e in self._forbid_alph:
                 for ind in range(len(alpha_min)):
@@ -118,7 +121,6 @@ class Password:
                                  + "(all or default) !")
 
     def with_char(self) -> list:
-        characters = ['!', '?', '@', '#', '$', '%', '^', '&', '*', '(', ')', '{', '}', '[', ']', '_', '-', '+']
         if self._forbid_char is not None:
             for e in self._forbid_char:
                 for ind in range(len(characters)):
