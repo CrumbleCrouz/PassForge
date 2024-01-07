@@ -1,8 +1,8 @@
 # PassForge Documentation
-First, download the modules listed in the [requirements.txt](requirements.txt) file using the command `pip install -r requirements.txt`.
+First, download the modules listed in the [requirements.txt](../requirements.txt) file using the command `pip install -r requirements.txt`.
 
 ## Using the CLI:
-Open the [main.py](main.py) file.
+Open the [main.py](../main.py) file.
 
 ### - Navigation:
 
@@ -16,7 +16,7 @@ Open the [main.py](main.py) file.
 ## Usage via Python console:
 
 ### Generation with default parameters
-Open a Python terminal where you downloaded the program and import [core.py](core.py).
+Open a Python terminal where you downloaded the program and import [core.py](../core.py).
 Create an instance of the Password class with the desired password length in a variable like this:
 ```python
 import core

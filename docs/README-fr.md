@@ -1,8 +1,8 @@
 # Documentation de PassForge
-Dans un premier temps, télécharger les modules présents dans le fichier [requirements.txt](requirements.txt) avec la commande `pip install -r requirements.txt`
+Dans un premier temps, télécharger les modules présents dans le fichier [requirements.txt](../requirements.txt) avec la commande `pip install -r requirements.txt`
 
 ## Utilisation du CLI :
-Ouvrez le fichier [main.py](main.py).
+Ouvrez le fichier [main.py](../main.py).
 
 ### - Navigation:
 
@@ -16,7 +16,7 @@ Ouvrez le fichier [main.py](main.py).
 ## Utilisation par console python :
 
 ### Génération avec les paramètres par défauts
-Ouvrez un terminal python là ou vous avez téléchargé le programme, et importez [core.py](core.py).
+Ouvrez un terminal python là ou vous avez téléchargé le programme, et importez [core.py](../core.py).
 Créer une instance de la classe Password avec la taille du mot de passe souhaité dans une variable comme ci:
 ```python
 import core
