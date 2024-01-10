@@ -32,6 +32,7 @@ def initial_screen():
     while True:
         clear_stdin()
         print("\033[H\033[J", end="")
+        os.system('')
         print(f"╔{'═' * 22}╗")
         print(f"║ [{selected_list[0]}] Default Settings ║")
         print(f"║ [{selected_list[1]}] Custom Settings  ║")
@@ -62,6 +63,7 @@ def ds_screen(n='0'):
     pressing = False
     while True:
         print("\033[H\033[J", end="")
+        os.system('')
         print(f"╔{'═' * (24 + ((len(n) + 2) if len(n) > 6 else 9))}╗")
         print(f"║ Press esc to return to the menu{' ' * ((len(n) - 6) if len(n) > 6 else 1)}║")
         print(f"╠{'═' * 23}╦{'═' * ((len(n) + 2) if len(n) > 6 else 9)}╣")
@@ -117,6 +119,7 @@ def cs_screen(alpha_ind=None, nb_alpha='0', nb_numb='0', nb_char='0', ban_alph=[
             nb_alpha) if len(nb_alpha) >= len(nb_numb) and len(nb_alpha) >= len(nb_char) else len(nb_numb) if len(
             nb_numb) >= len(nb_char) else len(nb_char)
         print("\033[H\033[J", end="")
+        os.system('')
         print(f"╔{'═' * (30 + bigger)}╗")
         print(f"║ Press esc to return to the menu {' ' * (bigger - 3)}║")
         print(f"╠{'═' * 27}╦{'═' * (bigger + 2)}╣")
@@ -208,6 +211,7 @@ def advanced_screen(ban_alpha: list, ban_numbers: list, ban_characters: list) ->
         bigger = len(str_letters) if len(str_letters) >= len(str_numbers) and len(str_letters) >= len(
             str_characters) else len(str_numbers) if len(str_numbers) >= len(str_characters) else len(str_characters)
         print("\033[H\033[J", end="")
+        os.system('')
         print(f"╔{'═' * 27}╦{'═' * (bigger + 2)}╗")
         print(f"║ [{selected_list[0]}] Banned letters:       ║ {str_letters.center(bigger)} ║")
         print(f"╠{'═' * 27}╬{'═' * (bigger + 2)}╣")
@@ -279,6 +283,7 @@ def result_screen(callback, size=None, nb_alpha=None, nb_numb=None, nb_char=None
                            not_alpha=banned_alpha, not_char=banned_characters, alpha_type=alpha_type).generate()
     while True:
         print("\033[H\033[J", end="")
+        os.system('')
         print(f"╔{'═' * (26 + (7 if len(passwd) < 8 else len(passwd) - 1))}╗")
         print(f"║ Press esc to return to the menu{' ' * (1 if len(passwd) < 8 else len(passwd) - 7)}║")
         print(f"╠{'═' * (26 + (7 if len(passwd) < 8 else len(passwd) - 1))}╣")
