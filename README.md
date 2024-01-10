@@ -1,2 +1,2 @@
-# [Documentation en Français](docs/ReadMe-fr.md)
-# [English Documentation](docs/ReadMe-en.md)
+# [Documentation en Français](docs/README-fr.md)
+# [English Documentation](docs/README-en.md)
